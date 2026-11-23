@@ -58,18 +58,37 @@ export default function Navbar() {
       </Link>
 
       <div className="nav-links desktop-only">
-        <Link href="/">Home</Link>
+        <Link href="/" style={{ color: pathname === '/' ? '#d17875' : undefined, fontWeight: pathname === '/' ? '700' : '500' }}>
+          Home
+        </Link>
         <div className="nav-dropdown-container">
-          <Link href="/products">Products & Services</Link>
+          <Link href="/products" style={{ color: pathname?.startsWith('/products') ? '#d17875' : undefined, fontWeight: pathname?.startsWith('/products') ? '700' : '500' }}>
+            Products
+          </Link>
           <div className="nav-dropdown">
-            <Link href="/products">All Products</Link>
+            <Link href="/products" style={{ fontWeight: pathname === '/products' ? 'bold' : 'normal' }}>
+              All Products
+            </Link>
             {navCategories.map(cat => (
-              <Link key={cat.slug} href={`/products/${cat.slug}`}>{cat.name}</Link>
+              <Link 
+                key={cat.slug} 
+                href={`/products/${cat.slug}`}
+                style={{ fontWeight: pathname === `/products/${cat.slug}` ? 'bold' : 'normal' }}
+              >
+                {cat.name}
+              </Link>
             ))}
           </div>
         </div>
-        <a href="#contact">Contact-Us</a>
-        <Link href="/about">About-Us</Link>
+        <Link href="/services" style={{ color: pathname === '/services' ? '#d17875' : undefined, fontWeight: pathname === '/services' ? '700' : '500' }}>
+          Services
+        </Link>
+        <Link href="/about" style={{ color: pathname === '/about' ? '#d17875' : undefined, fontWeight: pathname === '/about' ? '700' : '500' }}>
+          About Us
+        </Link>
+        <Link href="/contact" style={{ color: pathname === '/contact' ? '#d17875' : undefined, fontWeight: pathname === '/contact' ? '700' : '500' }}>
+          Contact Us
+        </Link>
       </div>
 
       <div className="nav-actions">
@@ -88,20 +107,32 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="mobile-menu">
-          <Link href="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-          <Link href="/products" onClick={() => setMobileMenuOpen(false)}>Products & Services</Link>
+          <Link href="/" onClick={() => setMobileMenuOpen(false)} style={{ color: pathname === '/' ? '#d17875' : undefined, fontWeight: pathname === '/' ? '700' : 'normal' }}>
+            Home
+          </Link>
+          <Link href="/products" onClick={() => setMobileMenuOpen(false)} style={{ color: pathname === '/products' ? '#d17875' : undefined, fontWeight: pathname === '/products' ? '700' : 'normal' }}>
+            Products
+          </Link>
           {navCategories.map(cat => (
             <Link
               key={cat.slug}
               href={`/products/${cat.slug}`}
               className="mobile-category-link"
               onClick={() => setMobileMenuOpen(false)}
+              style={{ color: pathname === `/products/${cat.slug}` ? '#d17875' : undefined, fontWeight: pathname === `/products/${cat.slug}` ? 'bold' : 'normal' }}
             >
               - {cat.name}
             </Link>
           ))}
-          <a href="#contact" onClick={() => setMobileMenuOpen(false)}>Contact</a>
-          <Link href="/about" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
+          <Link href="/services" onClick={() => setMobileMenuOpen(false)} style={{ color: pathname === '/services' ? '#d17875' : undefined, fontWeight: pathname === '/services' ? '700' : 'normal' }}>
+            Services
+          </Link>
+          <Link href="/about" onClick={() => setMobileMenuOpen(false)} style={{ color: pathname === '/about' ? '#d17875' : undefined, fontWeight: pathname === '/about' ? '700' : 'normal' }}>
+            About Us
+          </Link>
+          <Link href="/contact" onClick={() => setMobileMenuOpen(false)} style={{ color: pathname === '/contact' ? '#d17875' : undefined, fontWeight: pathname === '/contact' ? '700' : 'normal' }}>
+            Contact Us
+          </Link>
         </div>
       )}
     </nav>

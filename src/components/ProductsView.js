@@ -5,7 +5,6 @@ import { ShoppingCart, PackageOpen, ArrowLeft, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { products as defaultProducts } from '../data/products';
 import { API_BASE_URL } from '../config/api';
 
 export default function ProductsView({ activeCategoryParam }) {
