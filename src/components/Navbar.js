@@ -13,7 +13,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sections, setSections] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false);
   const { cart, setIsCartOpen } = useCart();
 
   if (pathname && pathname.startsWith('/admin')) {
@@ -38,22 +37,16 @@ export default function Navbar() {
         }
       } catch (err) {
         console.error("Navbar failed to fetch sections", err);
-      } finally {
-        setIsLoaded(true);
       }
     }
     fetchNavSections();
   }, []);
 
-  // Filter sections that should be visible in Navbar:
-  // If showInNav is explicitly true, show it.
-  // If showInNav is not false AND showOnHome is not false, show it.
-  // If both or showOnHome is false and showInNav is not explicitly true, hide it.
-  const navCategories = sections.filter(s => {
-    if (s.showInNav === true) return true;
-    if (s.showInNav === false) return false;
-    return s.showOnHome !== false;
-  }).map(s => ({ name: s.name, slug: s.slug }));
+  // ONLY show sections where showOnHome === true
+  // If the user turned off a section in Admin, it is completely hidden from Navbar!
+  const navCategories = sections
+    .filter(s => s.showOnHome === true && s.showInNav !== false)
+    .map(s => ({ name: s.name, slug: s.slug }));
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
