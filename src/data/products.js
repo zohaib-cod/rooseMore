@@ -1,12 +1,5 @@
 export const categories = [
-  "All",
-  "Bouquets",
-  "Room Decor",
-  "Car Decor",
-  "Zewar Sett",
-  "Party Decor",
-  "Artificial",
-  "Decor Accessories",
+  "All"
 ];
 
 export const products = [
