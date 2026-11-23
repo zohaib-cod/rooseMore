@@ -51,7 +51,9 @@ export default function LandingPage() {
     loadHomeData();
   }, []);
 
-  const featuredProduct = localProducts[0] || defaultProducts[0];
+  const activeSectionNames = new Set(sections.filter(s => s.showOnHome === true && s.isActive !== false).map(s => s.name.toLowerCase()));
+  const activeProducts = localProducts.filter(p => !p.category || activeSectionNames.has(p.category.toLowerCase()));
+  const featuredProduct = activeProducts[0] || localProducts[0] || defaultProducts[0];
   
   // Advanced Scroll Animation Setup
   const { scrollYProgress } = useScroll({
@@ -173,10 +175,7 @@ export default function LandingPage() {
         </div>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
-          {(isSectionsLoaded
-            ? sections.filter(s => s.showOnHome === true)
-            : (sections.length > 0 ? sections.filter(s => s.showOnHome === true) : categories.filter(c => c !== 'All').map(c => ({ name: c, slug: c.toLowerCase().replace(/ /g, '-') })))
-          ).map((section) => {
+          {sections.filter(s => s.showOnHome === true && s.isActive !== false).map((section) => {
             const categoryProducts = localProducts.filter(p => p.category?.toLowerCase() === section.name.toLowerCase());
             if (categoryProducts.length === 0) return null;
 

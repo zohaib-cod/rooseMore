@@ -1,11 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, PackageOpen, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, PackageOpen, ArrowLeft, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { products as defaultProducts, categories as defaultCategories } from '../data/products';
+import { products as defaultProducts } from '../data/products';
 import { API_BASE_URL } from '../config/api';
 
 export default function ProductsView({ activeCategoryParam }) {
@@ -25,17 +25,14 @@ export default function ProductsView({ activeCategoryParam }) {
         const secData = await secRes.json();
 
         if (prodData.success && Array.isArray(prodData.data)) {
-          setLocalProducts(prodData.data.length > 0 ? prodData.data : defaultProducts);
-        } else {
-          setLocalProducts(defaultProducts);
+          setLocalProducts(prodData.data);
         }
 
-        if (secData.success && Array.isArray(secData.data) && secData.data.length > 0) {
+        if (secData.success && Array.isArray(secData.data)) {
           setSections(secData.data);
         }
       } catch (err) {
         console.error('Failed to fetch data for view', err);
-        setLocalProducts(defaultProducts);
       } finally {
         setLoading(false);
       }
@@ -43,37 +40,48 @@ export default function ProductsView({ activeCategoryParam }) {
     loadData();
   }, []);
 
-  const allSections = sections.length > 0 
-    ? sections 
-    : defaultCategories.filter(c => c !== 'All').map(c => ({ name: c, slug: c.toLowerCase().replace(/ /g, '-') }));
+  // ONLY include active / enabled sections (showOnHome === true)
+  // Any section that the user turned OFF in Admin is completely excluded!
+  const visibleSections = sections.filter(s => s.showOnHome === true && s.isActive !== false);
+  const activeSectionNames = new Set(visibleSections.map(s => s.name.toLowerCase()));
 
-  // Find active category
+  // Check if current requested route/slug belongs to a disabled section
+  const currentSection = sections.find(s => s.slug === activeCategoryParam || s.name.toLowerCase() === activeCategoryParam?.toLowerCase());
+  const isSectionDisabled = currentSection && (currentSection.showOnHome === false || currentSection.isActive === false);
+
+  // Determine active category title
   let activeCategory = 'All';
-  let activeSectionDetails = null;
-
   if (activeCategoryParam && activeCategoryParam !== 'all') {
-    const matched = allSections.find(s => s.slug === activeCategoryParam || s.name.toLowerCase() === activeCategoryParam.toLowerCase());
-    if (matched) {
-      activeCategory = matched.name;
-      activeSectionDetails = matched;
+    if (currentSection) {
+      activeCategory = currentSection.name;
     } else {
       activeCategory = activeCategoryParam;
     }
   }
 
-  const filteredProducts = activeCategory === 'All' 
-    ? localProducts 
-    : localProducts.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
+  // Filter products:
+  // 1. If currently viewing a disabled section, show NO products
+  // 2. If viewing 'All', only show products that belong to an active/visible section
+  // 3. If viewing a specific active section, show only that section's products
+  let filteredProducts = [];
+  if (!isSectionDisabled) {
+    if (activeCategory === 'All') {
+      filteredProducts = localProducts.filter(p => !p.category || activeSectionNames.has(p.category.toLowerCase()));
+    } else {
+      filteredProducts = localProducts.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
+    }
+  }
 
   return (
     <main className="products-page">
       <div className="page-header">
         <h1>{activeCategory === 'All' ? 'Our Products & Services' : activeCategory}</h1>
         <p>
-          {activeSectionDetails?.description || 'Premium floral arrangements and decor, ready to order.'}
+          {currentSection?.description || 'Premium floral arrangements and decor, ready to order.'}
         </p>
       </div>
 
+      {/* Category Tabs: ONLY display active sections! Disabled sections are completely removed */}
       <div className="category-tabs">
         <Link 
           href="/products" 
@@ -81,7 +89,7 @@ export default function ProductsView({ activeCategoryParam }) {
         >
           All
         </Link>
-        {allSections.map(sec => (
+        {visibleSections.map(sec => (
           <Link 
             key={sec.slug} 
             href={`/products/${sec.slug}`}
@@ -96,12 +104,24 @@ export default function ProductsView({ activeCategoryParam }) {
         <div style={{ padding: '4rem', textAlign: 'center', color: '#888' }}>
           Loading products...
         </div>
+      ) : isSectionDisabled ? (
+        /* If section was turned OFF by admin */
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '15px', maxWidth: '600px', margin: '2rem auto', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+          <EyeOff size={60} color="#c62828" style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#c62828' }}>Section Disabled</h2>
+          <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+            "{activeCategory}" is currently turned off in the Admin Panel and hidden from the store.
+          </p>
+          <Link href="/products" className="cta-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem' }}>
+            <ArrowLeft size={18} /> View Active Products
+          </Link>
+        </div>
       ) : filteredProducts.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '15px', maxWidth: '600px', margin: '2rem auto', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
           <PackageOpen size={60} color="#d17875" style={{ marginBottom: '1rem' }} />
           <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>No products in "{activeCategory}" yet</h2>
           <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-            New items uploaded to this section from the Admin Panel will appear here in real-time.
+            New items uploaded to this section from the Admin Panel will appear here.
           </p>
           <Link href="/products" className="cta-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem' }}>
             <ArrowLeft size={18} /> View All Products
