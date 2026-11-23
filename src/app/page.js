@@ -26,23 +26,41 @@ export default function LandingPage() {
   const [localProducts, setLocalProducts] = useState(defaultProducts);
   const [sections, setSections] = useState([]);
   const [isSectionsLoaded, setIsSectionsLoaded] = useState(false);
+  const [heroData, setHeroData] = useState({
+    title: "Elevate Your Moments",
+    subtitle: "Premium Floral & Event Decoration in Lahore",
+    buttonText: "Shop Products",
+    buttonLink: "/products",
+    backgroundImage: "/images/bg.jpg"
+  });
 
   useEffect(() => {
     async function loadHomeData() {
       try {
-        const [prodRes, secRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/products`),
-          fetch(`${API_BASE_URL}/sections`)
+        const [prodRes, secRes, heroRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/products`).catch(() => null),
+          fetch(`${API_BASE_URL}/sections`).catch(() => null),
+          fetch(`${API_BASE_URL}/hero`).catch(() => null)
         ]);
-        const prodData = await prodRes.json();
-        const secData = await secRes.json();
 
-        if (prodData.success && Array.isArray(prodData.data) && prodData.data.length > 0) {
-          setLocalProducts(prodData.data);
+        if (prodRes && prodRes.ok) {
+          const prodData = await prodRes.json();
+          if (prodData.success && Array.isArray(prodData.data) && prodData.data.length > 0) {
+            setLocalProducts(prodData.data);
+          }
         }
-        if (secData.success && Array.isArray(secData.data)) {
-          setSections(secData.data);
-          setIsSectionsLoaded(true);
+        if (secRes && secRes.ok) {
+          const secData = await secRes.json();
+          if (secData.success && Array.isArray(secData.data)) {
+            setSections(secData.data);
+            setIsSectionsLoaded(true);
+          }
+        }
+        if (heroRes && heroRes.ok) {
+          const heroJson = await heroRes.json();
+          if (heroJson.success && heroJson.data) {
+            setHeroData(heroJson.data);
+          }
         }
       } catch (err) {
         console.error('Failed to fetch data for landing page', err);
@@ -89,7 +107,14 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-bg">
-          <Image src="/images/bg.jpg" alt="Hero Background" fill style={{ objectFit: 'cover', objectPosition: 'center' }} priority />
+          <Image 
+            src={heroData.backgroundImage || "/images/bg.jpg"} 
+            alt={heroData.title || "Hero Background"} 
+            fill 
+            style={{ objectFit: 'cover', objectPosition: 'center' }} 
+            priority 
+            unoptimized={heroData.backgroundImage?.startsWith('http')}
+          />
         </div>
         <div className="hero-overlay"></div>
         <motion.div 
@@ -98,10 +123,10 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >
-          <h1 className="hero-title">Elevate Your Moments</h1>
-          <p className="hero-subtitle">Premium Floral & Event Decoration in Lahore</p>
-          <Link href="/products" className="cta-button">
-            Shop Products <ArrowRight size={20} />
+          <h1 className="hero-title">{heroData.title || "Elevate Your Moments"}</h1>
+          <p className="hero-subtitle">{heroData.subtitle || "Premium Floral & Event Decoration in Lahore"}</p>
+          <Link href={heroData.buttonLink || "/products"} className="cta-button">
+            {heroData.buttonText || "Shop Products"} <ArrowRight size={20} />
           </Link>
         </motion.div>
       </section>
