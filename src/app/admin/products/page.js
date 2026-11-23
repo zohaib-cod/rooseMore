@@ -1,0 +1,169 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { Plus, Edit2, Trash2, X, Package } from 'lucide-react';
+import { categories } from '../../../data/products';
+
+export default function AdminProducts() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({ name: '', price: '', category: categories[1], image: '', description: '' });
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, image: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`);
+      const data = await res.json();
+      if (data.success) {
+        setProducts(data.data);
+      } else {
+        setError(data.error);
+      }
+    } catch (err) {
+      setError('Failed to fetch products. Ensure MongoDB is connected.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const url = editingId ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/${editingId}` : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`;
+    const method = editingId ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, price: Number(formData.price) })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsModalOpen(false);
+        fetchProducts();
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert("Error saving product");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/${id}`, { method: 'DELETE' });
+      fetchProducts();
+    } catch (err) {
+      alert("Error deleting product");
+    }
+  };
+
+  const openModal = (product = null) => {
+    if (product) {
+      setEditingId(product._id);
+      setFormData({ name: product.name, price: product.price, category: product.category, image: product.image, description: product.description });
+    } else {
+      setEditingId(null);
+      setFormData({ name: '', price: '', category: categories[1], image: '', description: '' });
+    }
+    setIsModalOpen(true);
+  };
+
+  if (loading) return <div>Loading Products...</div>;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem' }}>Manage Products</h1>
+        <button onClick={() => openModal()} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#d17875', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+          <Plus size={20} /> Add Product
+        </button>
+      </div>
+
+      {error ? (
+        <div style={{ background: '#ffebee', color: '#c62828', padding: '2rem', borderRadius: '10px' }}>
+          <h3>Database Connection Error</h3>
+          <p>{error}</p>
+        </div>
+      ) : products.length === 0 ? (
+        <div style={{ padding: '3rem', textAlign: 'center', background: 'white', borderRadius: '15px' }}>
+          <Package size={50} color="#ddd" style={{ marginBottom: '1rem' }} />
+          <h3>No products in database</h3>
+          <p>Click "Add Product" to create your first database product.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: '1.5rem' }}>
+          {products.map(product => (
+            <div key={product._id} style={{ background: 'white', padding: '1.5rem', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                <img src={product.image || '/images/bg.jpg'} alt={product.name} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '10px' }} />
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{product.name}</h3>
+                  <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{product.category}</p>
+                  <p style={{ fontWeight: 'bold', color: '#d17875' }}>Rs. {product.price}</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button onClick={() => openModal(product)} style={{ padding: '0.5rem', background: '#f8f9fa', border: '1px solid #ddd', borderRadius: '8px', cursor: 'pointer' }}><Edit2 size={18} color="#555" /></button>
+                <button onClick={() => handleDelete(product._id)} style={{ padding: '0.5rem', background: '#fff5f5', border: '1px solid #ffcdd2', borderRadius: '8px', cursor: 'pointer' }}><Trash2 size={18} color="#c62828" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'white', width: '90%', maxWidth: '500px', borderRadius: '15px', padding: '2rem', position: 'relative' }}>
+            <button onClick={() => setIsModalOpen(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} /></button>
+            <h2 style={{ marginBottom: '1.5rem' }}>{editingId ? 'Edit Product' : 'Add New Product'}</h2>
+            
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <input required placeholder="Product Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd' }} />
+              <input required type="number" placeholder="Price (Rs.)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd' }} />
+              <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd' }}>
+                {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.9rem', color: '#666', fontWeight: 'bold' }}>Product Image</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ flex: 1, padding: '0.5rem', border: '1px solid #ddd', borderRadius: '8px' }} />
+                  <span style={{ color: '#999', fontSize: '0.9rem' }}>OR</span>
+                  <input placeholder="Paste Image URL" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd' }} />
+                </div>
+                {formData.image && (
+                  <img src={formData.image} alt="Preview" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #ddd', marginTop: '0.5rem' }} />
+                )}
+              </div>
+              <textarea required placeholder="Description" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', minHeight: '80px' }}></textarea>
+              
+              <button type="submit" style={{ padding: '1rem', background: '#333', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', marginTop: '1rem' }}>
+                {editingId ? 'Save Changes' : 'Create Product'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
