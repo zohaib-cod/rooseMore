@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Layers, ExternalLink, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Layers, ExternalLink, Eye, EyeOff, Image as ImageIcon, Compass } from 'lucide-react';
 import Link from 'next/link';
 import { API_BASE_URL } from '../../../config/api';
 
@@ -18,6 +18,7 @@ export default function AdminSections() {
     description: '', 
     image: '', 
     showOnHome: true, 
+    showInNav: true,
     order: 0 
   });
 
@@ -53,16 +54,18 @@ export default function AdminSections() {
     }
   };
 
-  const handleToggleHome = async (section) => {
-    const updatedStatus = !section.showOnHome;
+  const handleToggle = async (section, field) => {
+    const currentValue = section[field] !== false;
+    const updatedStatus = !currentValue;
+    
     // Optimistic UI update
-    setSections(prev => prev.map(s => s._id === section._id ? { ...s, showOnHome: updatedStatus } : s));
+    setSections(prev => prev.map(s => s._id === section._id ? { ...s, [field]: updatedStatus } : s));
     
     try {
       const res = await fetch(`${API_BASE_URL}/sections/${section._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ showOnHome: updatedStatus })
+        body: JSON.stringify({ [field]: updatedStatus })
       });
       const data = await res.json();
       if (!data.success) {
@@ -72,7 +75,7 @@ export default function AdminSections() {
       }
     } catch (err) {
       setSections(prev => prev.map(s => s._id === section._id ? section : s));
-      alert('Error updating Home visibility');
+      alert('Error updating visibility');
     }
   };
 
@@ -126,6 +129,7 @@ export default function AdminSections() {
         description: section.description || '',
         image: section.image || '',
         showOnHome: section.showOnHome !== false,
+        showInNav: section.showInNav !== false,
         order: section.order || 0
       });
     } else {
@@ -136,6 +140,7 @@ export default function AdminSections() {
         description: '',
         image: '',
         showOnHome: true,
+        showInNav: true,
         order: sections.length + 1
       });
     }
@@ -150,7 +155,7 @@ export default function AdminSections() {
         <div>
           <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Manage Sections & Categories</h1>
           <p style={{ color: '#666', fontSize: '0.95rem' }}>
-            Create custom store sections, routes, and toggle their appearance on the Home Page.
+            Control where each section appears: on the Home Page and in the Navbar Menu.
           </p>
         </div>
         <button 
@@ -180,102 +185,142 @@ export default function AdminSections() {
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '1.25rem' }}>
-          {sections.map(section => (
-            <div 
-              key={section._id} 
-              style={{ 
-                background: 'white', 
-                padding: '1.5rem', 
-                borderRadius: '15px', 
-                boxShadow: '0 4px 15px rgba(0,0,0,0.05)', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '1rem'
-              }}
-            >
-              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                <div style={{ width: '70px', height: '70px', borderRadius: '12px', background: '#f5f5f5', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {section.image ? (
-                    <img src={section.image} alt={section.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <ImageIcon size={30} color="#bbb" />
-                  )}
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', margin: 0 }}>{section.name}</h3>
-                    <Link 
-                      href={`/products/${section.slug}`} 
-                      target="_blank"
-                      style={{ fontSize: '0.8rem', color: '#0969da', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none', background: '#eef3fb', padding: '0.2rem 0.5rem', borderRadius: '6px' }}
-                    >
-                      /products/{section.slug} <ExternalLink size={12} />
-                    </Link>
-                  </div>
-                  <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-                    {section.description || 'No description provided.'}
-                  </p>
-                </div>
-              </div>
+          {sections.map(section => {
+            const isHomeOn = section.showOnHome !== false;
+            const isNavOn = section.showInNav !== false && section.showOnHome !== false;
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-                {/* Home Page Toggle Switch */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f8f9fa', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid #eee' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: section.showOnHome ? '#2e7d32' : '#888', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    {section.showOnHome ? <Eye size={16} /> : <EyeOff size={16} />}
-                    {section.showOnHome ? 'On Home Page' : 'Hidden from Home'}
-                  </span>
-                  <label style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px', cursor: 'pointer' }}>
-                    <input 
-                      type="checkbox" 
-                      checked={section.showOnHome !== false} 
-                      onChange={() => handleToggleHome(section)}
-                      style={{ opacity: 0, width: 0, height: 0 }}
-                    />
-                    <span style={{
-                      position: 'absolute',
-                      top: 0, left: 0, right: 0, bottom: 0,
-                      backgroundColor: section.showOnHome ? '#4caf50' : '#ccc',
-                      borderRadius: '24px',
-                      transition: '0.3s'
-                    }}>
+            return (
+              <div 
+                key={section._id} 
+                style={{ 
+                  background: 'white', 
+                  padding: '1.5rem', 
+                  borderRadius: '15px', 
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.05)', 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '1rem'
+                }}
+              >
+                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                  <div style={{ width: '70px', height: '70px', borderRadius: '12px', background: '#f5f5f5', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {section.image ? (
+                      <img src={section.image} alt={section.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <ImageIcon size={30} color="#bbb" />
+                    )}
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                      <h3 style={{ fontSize: '1.25rem', margin: 0 }}>{section.name}</h3>
+                      <Link 
+                        href={`/products/${section.slug}`} 
+                        target="_blank"
+                        style={{ fontSize: '0.8rem', color: '#0969da', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none', background: '#eef3fb', padding: '0.2rem 0.5rem', borderRadius: '6px' }}
+                      >
+                        /products/{section.slug} <ExternalLink size={12} />
+                      </Link>
+                    </div>
+                    <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
+                      {section.description || 'No description provided.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  {/* Home Page Toggle Switch */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f8f9fa', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid #eee' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: isHomeOn ? '#2e7d32' : '#888', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      {isHomeOn ? <Eye size={16} /> : <EyeOff size={16} />}
+                      {isHomeOn ? 'Home: Visible' : 'Home: Hidden'}
+                    </span>
+                    <label style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={isHomeOn} 
+                        onChange={() => handleToggle(section, 'showOnHome')}
+                        style={{ opacity: 0, width: 0, height: 0 }}
+                      />
                       <span style={{
                         position: 'absolute',
-                        content: '""',
-                        height: '18px',
-                        width: '18px',
-                        left: section.showOnHome ? '22px' : '3px',
-                        bottom: '3px',
-                        backgroundColor: 'white',
-                        borderRadius: '50%',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: isHomeOn ? '#4caf50' : '#ccc',
+                        borderRadius: '24px',
                         transition: '0.3s'
-                      }} />
-                    </span>
-                  </label>
-                </div>
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          content: '""',
+                          height: '18px',
+                          width: '18px',
+                          left: isHomeOn ? '22px' : '3px',
+                          bottom: '3px',
+                          backgroundColor: 'white',
+                          borderRadius: '50%',
+                          transition: '0.3s'
+                        }} />
+                      </span>
+                    </label>
+                  </div>
 
-                {/* Edit & Delete actions */}
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button 
-                    onClick={() => openModal(section)} 
-                    style={{ padding: '0.6rem', background: '#f8f9fa', border: '1px solid #ddd', borderRadius: '8px', cursor: 'pointer' }}
-                    title="Edit Section"
-                  >
-                    <Edit2 size={18} color="#555" />
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(section._id)} 
-                    style={{ padding: '0.6rem', background: '#fff5f5', border: '1px solid #ffcdd2', borderRadius: '8px', cursor: 'pointer' }}
-                    title="Delete Section"
-                  >
-                    <Trash2 size={18} color="#c62828" />
-                  </button>
+                  {/* Navbar Menu Toggle Switch */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f8f9fa', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid #eee' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: isNavOn ? '#1565c0' : '#888', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Compass size={16} />
+                      {isNavOn ? 'Navbar: Visible' : 'Navbar: Hidden'}
+                    </span>
+                    <label style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={isNavOn} 
+                        onChange={() => handleToggle(section, 'showInNav')}
+                        style={{ opacity: 0, width: 0, height: 0 }}
+                      />
+                      <span style={{
+                        position: 'absolute',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: isNavOn ? '#2196f3' : '#ccc',
+                        borderRadius: '24px',
+                        transition: '0.3s'
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          content: '""',
+                          height: '18px',
+                          width: '18px',
+                          left: isNavOn ? '22px' : '3px',
+                          bottom: '3px',
+                          backgroundColor: 'white',
+                          borderRadius: '50%',
+                          transition: '0.3s'
+                        }} />
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Edit & Delete actions */}
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button 
+                      onClick={() => openModal(section)} 
+                      style={{ padding: '0.6rem', background: '#f8f9fa', border: '1px solid #ddd', borderRadius: '8px', cursor: 'pointer' }}
+                      title="Edit Section"
+                    >
+                      <Edit2 size={18} color="#555" />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(section._id)} 
+                      style={{ padding: '0.6rem', background: '#fff5f5', border: '1px solid #ffcdd2', borderRadius: '8px', cursor: 'pointer' }}
+                      title="Delete Section"
+                    >
+                      <Trash2 size={18} color="#c62828" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -351,12 +396,26 @@ export default function AdminSections() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: '#f8f9fa', borderRadius: '10px', border: '1px solid #eee' }}>
                 <div>
                   <span style={{ fontWeight: 'bold', display: 'block', fontSize: '0.95rem' }}>Show on Home Page</span>
-                  <small style={{ color: '#666' }}>Toggle ON to feature this section under "Shop by Category" on Home page.</small>
+                  <small style={{ color: '#666' }}>Display this section under "Shop by Category" on Home page.</small>
                 </div>
                 <input 
                   type="checkbox" 
                   checked={formData.showOnHome} 
                   onChange={e => setFormData({ ...formData, showOnHome: e.target.checked })}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                />
+              </div>
+
+              {/* Show in Navbar Menu Option */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: '#f8f9fa', borderRadius: '10px', border: '1px solid #eee' }}>
+                <div>
+                  <span style={{ fontWeight: 'bold', display: 'block', fontSize: '0.95rem' }}>Show in Navbar Dropdown</span>
+                  <small style={{ color: '#666' }}>Include this section link in the "Products & Services" header menu.</small>
+                </div>
+                <input 
+                  type="checkbox" 
+                  checked={formData.showInNav} 
+                  onChange={e => setFormData({ ...formData, showInNav: e.target.checked })}
                   style={{ width: '20px', height: '20px', cursor: 'pointer' }}
                 />
               </div>

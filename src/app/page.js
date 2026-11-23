@@ -25,6 +25,7 @@ export default function LandingPage() {
   const { addToCart } = useCart();
   const [localProducts, setLocalProducts] = useState(defaultProducts);
   const [sections, setSections] = useState([]);
+  const [isSectionsLoaded, setIsSectionsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadHomeData() {
@@ -39,8 +40,9 @@ export default function LandingPage() {
         if (prodData.success && Array.isArray(prodData.data) && prodData.data.length > 0) {
           setLocalProducts(prodData.data);
         }
-        if (secData.success && Array.isArray(secData.data) && secData.data.length > 0) {
+        if (secData.success && Array.isArray(secData.data)) {
           setSections(secData.data);
+          setIsSectionsLoaded(true);
         }
       } catch (err) {
         console.error('Failed to fetch data for landing page', err);
@@ -171,9 +173,9 @@ export default function LandingPage() {
         </div>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
-          {(sections.length > 0 
-            ? sections.filter(s => s.showOnHome !== false)
-            : categories.filter(c => c !== 'All').map(c => ({ name: c, slug: c.toLowerCase().replace(/ /g, '-') }))
+          {(isSectionsLoaded
+            ? sections.filter(s => s.showOnHome === true)
+            : (sections.length > 0 ? sections.filter(s => s.showOnHome === true) : categories.filter(c => c !== 'All').map(c => ({ name: c, slug: c.toLowerCase().replace(/ /g, '-') })))
           ).map((section) => {
             const categoryProducts = localProducts.filter(p => p.category?.toLowerCase() === section.name.toLowerCase());
             if (categoryProducts.length === 0) return null;

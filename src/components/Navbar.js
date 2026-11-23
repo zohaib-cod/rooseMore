@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Phone, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { categories as defaultCategories } from '../data/products';
 import { API_BASE_URL } from '../config/api';
 
 export default function Navbar() {
@@ -14,6 +13,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sections, setSections] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { cart, setIsCartOpen } = useCart();
 
   if (pathname && pathname.startsWith('/admin')) {
@@ -33,19 +33,27 @@ export default function Navbar() {
       try {
         const res = await fetch(`${API_BASE_URL}/sections`);
         const data = await res.json();
-        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        if (data.success && Array.isArray(data.data)) {
           setSections(data.data);
         }
       } catch (err) {
         console.error("Navbar failed to fetch sections", err);
+      } finally {
+        setIsLoaded(true);
       }
     }
     fetchNavSections();
   }, []);
 
-  const navCategories = sections.length > 0
-    ? sections.map(s => ({ name: s.name, slug: s.slug }))
-    : defaultCategories.filter(c => c !== 'All').map(c => ({ name: c, slug: c.toLowerCase().replace(/ /g, '-') }));
+  // Filter sections that should be visible in Navbar:
+  // If showInNav is explicitly true, show it.
+  // If showInNav is not false AND showOnHome is not false, show it.
+  // If both or showOnHome is false and showInNav is not explicitly true, hide it.
+  const navCategories = sections.filter(s => {
+    if (s.showInNav === true) return true;
+    if (s.showInNav === false) return false;
+    return s.showOnHome !== false;
+  }).map(s => ({ name: s.name, slug: s.slug }));
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
