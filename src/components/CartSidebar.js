@@ -8,6 +8,7 @@ import { useCart } from '../context/CartContext';
 import Image from 'next/image';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { API_BASE_URL } from '../config/api';
 
 export default function CartSidebar() {
   const pathname = usePathname();
@@ -115,7 +116,7 @@ export default function CartSidebar() {
     };
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders`, {
+      const res = await fetch(`${API_BASE_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)

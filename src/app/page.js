@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from 'next/link';
 import { useCart } from '../context/CartContext';
 import { products as defaultProducts, categories } from '../data/products';
+import { API_BASE_URL } from '../config/api';
 
 const services = [
   { title: "Original & Artificial Flowers", icon: Flower2, desc: "Breathtaking arrangements using fresh and premium artificial blooms." },
@@ -27,9 +28,9 @@ export default function LandingPage() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`);
+        const res = await fetch(`${API_BASE_URL}/products`);
         const data = await res.json();
-        if (data.success && data.data.length > 0) {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setLocalProducts(data.data);
         }
       } catch (err) {
@@ -38,6 +39,8 @@ export default function LandingPage() {
     }
     fetchProducts();
   }, []);
+
+  const featuredProduct = localProducts[0] || defaultProducts[0];
   
   // Advanced Scroll Animation Setup
   const { scrollYProgress } = useScroll({
@@ -99,8 +102,8 @@ export default function LandingPage() {
               <motion.div style={{ opacity: cardOpacity, scale: cardScale }} className="card-glass-body">
                 {/* Product Info */}
                 <div className="card-text-bottom">
-                  <h3>Classic Red Rose Bouquet</h3>
-                  <p>Rs. 3500</p>
+                  <h3>{featuredProduct.name}</h3>
+                  <p>Rs. {featuredProduct.price}</p>
                 </div>
               </motion.div>
               
@@ -110,8 +113,8 @@ export default function LandingPage() {
                 style={{ y: flowerY, rotate: flowerRotate, scale: flowerScale }}
               >
                 <img 
-                  src="/images/bg.jpg" 
-                  alt="Premium Rose" 
+                  src={featuredProduct.image || "/images/bg.jpg"} 
+                  alt={featuredProduct.name} 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                   className="rounded-flower"
                 />
@@ -178,11 +181,11 @@ export default function LandingPage() {
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.4, delay: index * 0.1 }}
-                      key={product.id} 
+                      key={product._id || product.id} 
                       className="product-card threed-card"
                     >
                       <div className="product-image-container">
-                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={product.image || '/images/bg.jpg'} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <button 
                           className="add-to-cart-quick"
                           onClick={() => addToCart(product)}

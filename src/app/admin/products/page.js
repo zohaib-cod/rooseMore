@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Package } from 'lucide-react';
-import { categories } from '../../../data/products';
+import { Plus, Edit2, Trash2, X, Package, Download } from 'lucide-react';
+import { categories, products as defaultProducts } from '../../../data/products';
+import { API_BASE_URL } from '../../../config/api';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSeeding, setIsSeeding] = useState(false);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -26,10 +28,11 @@ export default function AdminProducts() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`);
+      const res = await fetch(`${API_BASE_URL}/products`);
       const data = await res.json();
       if (data.success) {
         setProducts(data.data);
+        setError(null);
       } else {
         setError(data.error);
       }
@@ -46,7 +49,7 @@ export default function AdminProducts() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const url = editingId ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/${editingId}` : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`;
+    const url = editingId ? `${API_BASE_URL}/products/${editingId}` : `${API_BASE_URL}/products`;
     const method = editingId ? 'PUT' : 'POST';
 
     try {
@@ -70,10 +73,36 @@ export default function AdminProducts() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/products/${id}`, { method: 'DELETE' });
       fetchProducts();
     } catch (err) {
       alert("Error deleting product");
+    }
+  };
+
+  const handleSeedDefaults = async () => {
+    if (!confirm("This will load the initial default products into the database. Continue?")) return;
+    setIsSeeding(true);
+    try {
+      for (const p of defaultProducts) {
+        await fetch(`${API_BASE_URL}/products`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: p.name,
+            price: p.price,
+            category: p.category,
+            image: p.image,
+            description: p.description
+          })
+        });
+      }
+      await fetchProducts();
+      alert("Default products loaded into database successfully!");
+    } catch (err) {
+      alert("Error saving products to database");
+    } finally {
+      setIsSeeding(false);
     }
   };
 
@@ -92,23 +121,42 @@ export default function AdminProducts() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 style={{ fontSize: '2rem' }}>Manage Products</h1>
-        <button onClick={() => openModal()} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#d17875', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-          <Plus size={20} /> Add Product
-        </button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            onClick={handleSeedDefaults} 
+            disabled={isSeeding}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#333', color: 'white', padding: '0.75rem 1.25rem', borderRadius: '8px', border: 'none', cursor: isSeeding ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+          >
+            <Download size={18} /> {isSeeding ? 'Importing...' : 'Import Default Products'}
+          </button>
+          <button 
+            onClick={() => openModal()} 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#d17875', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            <Plus size={20} /> Add Product
+          </button>
+        </div>
       </div>
 
       {error ? (
-        <div style={{ background: '#ffebee', color: '#c62828', padding: '2rem', borderRadius: '10px' }}>
-          <h3>Database Connection Error</h3>
+        <div style={{ background: '#ffebee', color: '#c62828', padding: '2rem', borderRadius: '10px', marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '0.5rem' }}>Database Connection Notice</h3>
           <p>{error}</p>
         </div>
       ) : products.length === 0 ? (
         <div style={{ padding: '3rem', textAlign: 'center', background: 'white', borderRadius: '15px' }}>
           <Package size={50} color="#ddd" style={{ marginBottom: '1rem' }} />
-          <h3>No products in database</h3>
-          <p>Click "Add Product" to create your first database product.</p>
+          <h3>No products in database yet</h3>
+          <p style={{ color: '#666', marginTop: '0.5rem', marginBottom: '1.5rem' }}>Click "Add Product" to create a new product, or "Import Default Products" to load the initial catalogue.</p>
+          <button 
+            onClick={handleSeedDefaults} 
+            disabled={isSeeding}
+            style={{ background: '#d17875', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: isSeeding ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+          >
+            {isSeeding ? 'Importing...' : 'Load Default Products'}
+          </button>
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '1.5rem' }}>

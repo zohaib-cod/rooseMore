@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../../../config/api';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -10,7 +11,7 @@ export default function AdminOrders() {
   useEffect(() => {
     async function fetchOrders() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders`);
+        const res = await fetch(`${API_BASE_URL}/orders`);
         const data = await res.json();
         if (data.success) {
           setOrders(data.data);
@@ -28,7 +29,7 @@ export default function AdminOrders() {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/${orderId}`, {
+      const res = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
