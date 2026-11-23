@@ -6,12 +6,14 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Phone, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { categories } from '../data/products';
+import { categories as defaultCategories } from '../data/products';
+import { API_BASE_URL } from '../config/api';
 
 export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sections, setSections] = useState([]);
   const { cart, setIsCartOpen } = useCart();
 
   if (pathname && pathname.startsWith('/admin')) {
@@ -25,6 +27,25 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    async function fetchNavSections() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/sections`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setSections(data.data);
+        }
+      } catch (err) {
+        console.error("Navbar failed to fetch sections", err);
+      }
+    }
+    fetchNavSections();
+  }, []);
+
+  const navCategories = sections.length > 0
+    ? sections.map(s => ({ name: s.name, slug: s.slug }))
+    : defaultCategories.filter(c => c !== 'All').map(c => ({ name: c, slug: c.toLowerCase().replace(/ /g, '-') }));
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
@@ -40,12 +61,10 @@ export default function Navbar() {
         <div className="nav-dropdown-container">
           <Link href="/products">Products & Services</Link>
           <div className="nav-dropdown">
-            {categories.map(cat => {
-              const slug = cat === 'All' ? '' : cat.toLowerCase().replace(/ /g, '-');
-              return (
-                <Link key={cat} href={`/products/${slug}`}>{cat}</Link>
-              );
-            })}
+            <Link href="/products">All Products</Link>
+            {navCategories.map(cat => (
+              <Link key={cat.slug} href={`/products/${cat.slug}`}>{cat.name}</Link>
+            ))}
           </div>
         </div>
         <a href="#contact">Contact-Us</a>
@@ -70,14 +89,14 @@ export default function Navbar() {
         <div className="mobile-menu">
           <Link href="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
           <Link href="/products" onClick={() => setMobileMenuOpen(false)}>Products & Services</Link>
-          {categories.filter(c => c !== 'All').map(cat => (
+          {navCategories.map(cat => (
             <Link
-              key={cat}
-              href={`/products/${cat.toLowerCase().replace(/ /g, '-')}`}
+              key={cat.slug}
+              href={`/products/${cat.slug}`}
               className="mobile-category-link"
               onClick={() => setMobileMenuOpen(false)}
             >
-              - {cat}
+              - {cat.name}
             </Link>
           ))}
           <a href="#contact" onClick={() => setMobileMenuOpen(false)}>Contact</a>

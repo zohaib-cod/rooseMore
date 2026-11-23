@@ -24,20 +24,29 @@ export default function LandingPage() {
   const containerRef = useRef(null);
   const { addToCart } = useCart();
   const [localProducts, setLocalProducts] = useState(defaultProducts);
+  const [sections, setSections] = useState([]);
 
   useEffect(() => {
-    async function fetchProducts() {
+    async function loadHomeData() {
       try {
-        const res = await fetch(`${API_BASE_URL}/products`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-          setLocalProducts(data.data);
+        const [prodRes, secRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/products`),
+          fetch(`${API_BASE_URL}/sections`)
+        ]);
+        const prodData = await prodRes.json();
+        const secData = await secRes.json();
+
+        if (prodData.success && Array.isArray(prodData.data) && prodData.data.length > 0) {
+          setLocalProducts(prodData.data);
+        }
+        if (secData.success && Array.isArray(secData.data) && secData.data.length > 0) {
+          setSections(secData.data);
         }
       } catch (err) {
-        console.error('Failed to fetch products for landing page', err);
+        console.error('Failed to fetch data for landing page', err);
       }
     }
-    fetchProducts();
+    loadHomeData();
   }, []);
 
   const featuredProduct = localProducts[0] || defaultProducts[0];
@@ -162,15 +171,18 @@ export default function LandingPage() {
         </div>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
-          {categories.filter(c => c !== 'All').map((category) => {
-            const categoryProducts = localProducts.filter(p => p.category === category);
+          {(sections.length > 0 
+            ? sections.filter(s => s.showOnHome !== false)
+            : categories.filter(c => c !== 'All').map(c => ({ name: c, slug: c.toLowerCase().replace(/ /g, '-') }))
+          ).map((section) => {
+            const categoryProducts = localProducts.filter(p => p.category?.toLowerCase() === section.name.toLowerCase());
             if (categoryProducts.length === 0) return null;
 
             return (
-              <div key={category} style={{ marginBottom: '4rem' }}>
+              <div key={section.slug || section._id} style={{ marginBottom: '4rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #f7cac9', paddingBottom: '0.5rem', marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '2rem', fontFamily: "'Playfair Display', serif", color: '#1a1a1a' }}>{category}</h3>
-                  <Link href={`/products/${category.toLowerCase().replace(/ /g, '-')}`} style={{ color: '#d17875', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <h3 style={{ fontSize: '2rem', fontFamily: "'Playfair Display', serif", color: '#1a1a1a' }}>{section.name}</h3>
+                  <Link href={`/products/${section.slug}`} style={{ color: '#d17875', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     View All <ArrowRight size={16} />
                   </Link>
                 </div>
