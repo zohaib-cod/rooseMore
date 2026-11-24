@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { 
   Phone, MapPin, Flower2, Gift, Sparkles, Heart, Crown, Home as HomeIcon, 
-  ArrowRight, ShoppingCart, PartyPopper, Calendar, Star, Camera, Smile, Cake, Sun, Gem, Palette 
+  ArrowRight, ShoppingCart, PartyPopper, Calendar, Star, Camera, Smile, Cake, Sun, Gem, Palette,
+  Plus
 } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
@@ -107,35 +108,6 @@ export default function LandingPage() {
       : (showcaseData.productId?.price || (featuredProduct ? featuredProduct.price : 0)),
     image: showcaseData.image || showcaseData.productId?.image || (featuredProduct ? featuredProduct.image : "/images/bg.jpg")
   } : null;
-  
-  // Advanced Scroll Animation Setup
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end end"]
-  });
-
-  // Scroll phase 1: Flower falls down into the card (0 to 0.4)
-  const flowerY = useTransform(scrollYProgress, [0, 0.4], ["-100vh", "0vh"]);
-  const flowerRotate = useTransform(scrollYProgress, [0, 0.4], [-45, 0]);
-  const flowerScale = useTransform(scrollYProgress, [0, 0.4], [1.5, 1]);
-
-  // Scroll phase 2: Card reveals and shrinks slightly (0.4 to 0.6)
-  const cardOpacity = useTransform(scrollYProgress, [0.3, 0.4], [0, 1]);
-  const cardScale = useTransform(scrollYProgress, [0.4, 0.6], [1.1, 1]);
-
-  // Scroll phase 3: Card moves left, text appears right (0.6 to 1.0)
-  const containerX = useTransform(scrollYProgress, [0.6, 0.9], ["0%", "-25%"]);
-  const textOpacity = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
-  const textX = useTransform(scrollYProgress, [0.7, 0.9], [50, 0]);
-
-  // Handle Mobile Responsiveness for the animation
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   return (
     <main>
@@ -163,75 +135,82 @@ export default function LandingPage() {
             <p className="hero-subtitle">{heroData.subtitle}</p>
             {heroData.buttonText && (
               <Link href={heroData.buttonLink || "/products"} className="cta-button">
-                {heroData.buttonText} <ArrowRight size={20} />
+                {heroData.buttonText} <ArrowRight size={14} />
               </Link>
             )}
           </motion.div>
         )}
       </section>
 
-      {/* Advanced Scroll Animation Section */}
-      <section ref={containerRef} className="scroll-animation-wrapper">
-        <div className="sticky-container">
-          <div className="sticky-content">
-            {/* The Animated Product Composition */}
+      {/* Showcase Section: Clean Luxury Feature Card with Falling Image Animation */}
+      {showcaseData && (
+        <section className="showcase-section">
+          <div className="showcase-container">
+            {/* The Featured Product Card */}
             {showcaseProduct && (
-              <motion.div style={{ x: isMobile ? 0 : containerX }} className="animated-product-card">
-                <motion.div style={{ opacity: cardOpacity, scale: cardScale }} className="card-glass-body">
-                  {/* Product Info */}
-                  <div className="card-text-bottom">
-                    <h3>{showcaseProduct.name}</h3>
-                    {showcaseProduct.price > 0 && <p>Rs. {showcaseProduct.price}</p>}
-                  </div>
-                </motion.div>
-                
-                {/* The falling flower image that lands EXACTLY in the card */}
-                <motion.div 
-                  className="falling-flower-img"
-                  style={{ y: flowerY, rotate: flowerRotate, scale: flowerScale }}
-                >
-                  <img 
-                    src={showcaseProduct.image || "/images/bg.jpg"} 
-                    alt={showcaseProduct.name} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    className="rounded-flower"
-                  />
-                </motion.div>
+              <motion.div 
+                className="showcase-card"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="showcase-image-wrapper">
+                  <motion.div
+                    className="falling-image-container"
+                    initial={{ y: -90, opacity: 0, scale: 1.15 }}
+                    whileInView={{ y: 0, opacity: 1, scale: 1 }}
+                    viewport={{ once: false, amount: 0.35 }}
+                    transition={{ type: "spring", stiffness: 75, damping: 15, duration: 0.8 }}
+                    style={{ width: '100%', height: '100%' }}
+                  >
+                    <img 
+                      src={showcaseProduct.image || "/images/bg.jpg"} 
+                      alt={showcaseProduct.name} 
+                      className="showcase-img"
+                    />
+                  </motion.div>
+                </div>
+                <div className="showcase-card-info">
+                  <h3>{showcaseProduct.name}</h3>
+                  {showcaseProduct.price > 0 && <p>Rs. {showcaseProduct.price}</p>}
+                </div>
               </motion.div>
             )}
 
-            {/* The text that reveals alongside it */}
-            {!isMobile && showcaseData && (
-              <motion.div 
-                className="animated-text-reveal"
-                style={{ x: textX, color: '#1a1a1a', opacity: 1 }}
-              >
-                <h2 className="section-title" style={{ color: '#1a1a1a', textShadow: 'none' }}>
-                  {showcaseData.title}
-                </h2>
-                <p style={{ color: '#333', fontWeight: 600, textShadow: 'none' }}>
-                  {showcaseData.description}
-                </p>
-                {showcaseData.buttonText && (
-                  <Link href={showcaseData.buttonLink || "/products"} className="cta-button" style={{ marginTop: '2rem', display: 'inline-block' }}>
-                    {showcaseData.buttonText}
-                  </Link>
-                )}
-              </motion.div>
-            )}
+            {/* The narrative text alongside it */}
+            <motion.div 
+              className="showcase-text"
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+            >
+              <h2 className="section-title" style={{ textAlign: 'left', color: '#1a1a1a' }}>
+                {showcaseData.title}
+              </h2>
+              <p style={{ color: '#555', lineHeight: '1.7', marginBottom: '1.25rem' }}>
+                {showcaseData.description}
+              </p>
+              {showcaseData.buttonText && (
+                <Link href={showcaseData.buttonLink || "/products"} className="cta-button" style={{ display: 'inline-flex' }}>
+                  {showcaseData.buttonText} <ArrowRight size={13} />
+                </Link>
+              )}
+            </motion.div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Category Wise Products Section */}
-      <section className="services-section" style={{ background: '#fff', marginTop: '-30vh', paddingTop: '10vh', position: 'relative', zIndex: 10 }}>
+      <section className="services-section" style={{ background: '#fff', position: 'relative', zIndex: 10 }}>
         <div className="section-header">
           <motion.h2 
             className="section-title"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
             Shop by Category
           </motion.h2>
@@ -240,57 +219,63 @@ export default function LandingPage() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            Explore our diverse range of premium floral arrangements and event decor.
+            Explore our curated range of floral arrangements and bespoke event decor.
           </motion.p>
         </div>
 
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 1rem' }}>
           {sections.filter(s => s.showOnHome === true && s.isActive !== false).map((section) => {
             const categoryProducts = localProducts.filter(p => p.category?.toLowerCase() === section.name.toLowerCase());
             if (categoryProducts.length === 0) return null;
 
             return (
-              <div key={section.slug || section._id} style={{ marginBottom: '4rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #f7cac9', paddingBottom: '0.5rem', marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '2rem', fontFamily: "'Playfair Display', serif", color: '#1a1a1a' }}>{section.name}</h3>
-                  <Link href={`/products/${section.slug}`} style={{ color: '#d17875', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    View All <ArrowRight size={16} />
+              <div key={section.slug || section._id} style={{ marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1.5px solid #f7cac9', paddingBottom: '0.4rem', marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: 'clamp(1.2rem, 2.2vw, 1.55rem)', fontFamily: "'Playfair Display', serif", color: '#1a1a1a' }}>{section.name}</h3>
+                  <Link href={`/products/${section.slug}`} style={{ color: '#d17875', fontWeight: '600', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    View All <ArrowRight size={14} />
                   </Link>
                 </div>
                 <div className="products-grid">
-                  {categoryProducts.slice(0, 4).map((product, index) => (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: index * 0.1 }}
-                      key={product._id || product.id} 
-                      className="product-card threed-card"
-                    >
-                      <div className="product-image-container">
-                        <img src={product.image || '/images/bg.jpg'} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <button 
-                          className="add-to-cart-quick"
-                          onClick={() => addToCart(product)}
-                        >
-                          <ShoppingCart size={20} />
-                        </button>
-                      </div>
-                      <div className="product-info">
-                        <span className="product-category">{product.category}</span>
-                        <h3>{product.name}</h3>
-                        <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>{product.description}</p>
-                        <div className="product-bottom">
-                          <span className="product-price">Rs. {product.price}</span>
-                          <button className="add-cart-btn" onClick={() => addToCart(product)}>
-                            Add to Cart
+                  {categoryProducts.slice(0, 4).map((product, index) => {
+                    const discountPercent = product.discount || ((index % 2 === 0) ? 30 : 50);
+                    const originalPrice = product.originalPrice || Math.round(product.price / (1 - discountPercent / 100));
+                    return (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.35, delay: index * 0.08 }}
+                        key={product._id || product.id} 
+                        className="product-card"
+                      >
+                        <div className="product-image-container">
+                          <span className="product-badge-save">SAVE {discountPercent}%</span>
+                          <img src={product.image || '/images/bg.jpg'} alt={product.name} />
+                          <button 
+                            type="button" 
+                            className="product-quick-add-btn" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(product);
+                            }}
+                            title="Add to Cart"
+                          >
+                            <Plus size={18} strokeWidth={2.4} />
                           </button>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                        <div className="product-info">
+                          <h3 className="product-title">{product.name}</h3>
+                          <div className="product-prices-wrapper">
+                            <span className="product-price-current">RS.{Number(product.price).toLocaleString()}</span>
+                            <span className="product-price-original">RS.{Number(originalPrice).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -322,33 +307,32 @@ export default function LandingPage() {
             </motion.p>
           </div>
 
-          <div className="services-grid perspective-container">
+          <div className="services-grid">
             {servicesList.filter(s => s.isActive !== false).map((service, index) => {
               const Icon = iconMap[(service.icon || '').toLowerCase()] || Sparkles;
               return (
                 <motion.div
                   key={service._id || index}
-                  className="glass-card threed-card"
-                  initial={{ opacity: 0, rotateX: 20, y: 50 }}
-                  whileInView={{ opacity: 1, rotateX: 0, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05, rotateY: 5, rotateX: -5 }}
-                  style={{ padding: '2rem', textAlign: 'center' }}
+                  className="glass-card service-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  whileHover={{ y: -3 }}
                 >
-                  <div className="service-icon" style={{ margin: '0 auto 1.5rem auto' }}>
-                    <Icon size={30} />
+                  <div className="service-icon">
+                    <Icon size={20} />
                   </div>
-                  <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>{service.title}</h3>
-                  <p style={{ color: '#555', fontSize: '0.95rem' }}>{service.desc}</p>
+                  <h3>{service.title}</h3>
+                  <p>{service.desc}</p>
                 </motion.div>
               );
             })}
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-            <Link href="/services" className="cta-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              Explore All Services & Bookings <ArrowRight size={18} />
+          <div style={{ textAlign: 'center', marginTop: '1.75rem' }}>
+            <Link href="/services" className="cta-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              View All Services <ArrowRight size={13} />
             </Link>
           </div>
         </section>
@@ -360,12 +344,13 @@ export default function LandingPage() {
           <div className="info-container">
             <motion.div 
               className="info-image"
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.5 }}
+              style={{ width: '100%', boxSizing: 'border-box' }}
             >
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '20px', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '0px', overflow: 'hidden' }}>
                 <Image 
                   src={aboutData.image || "/images/bike.jpg"} 
                   alt={aboutData.title || "Decoration Info"} 
@@ -374,39 +359,32 @@ export default function LandingPage() {
                   unoptimized={aboutData.image?.startsWith('http')}
                 />
               </div>
-              {/* Floating decorative elements */}
-              <motion.div 
-                style={{ position: 'absolute', top: '-20px', right: '-20px', background: 'white', padding: '15px', borderRadius: '50%', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
-                animate={{ y: [0, -10, 0] }}
-                transition={{ repeat: Infinity, duration: 3 }}
-              >
-                <Flower2 color="#f7cac9" size={40} />
-              </motion.div>
             </motion.div>
 
             <motion.div 
               className="info-text"
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              style={{ width: '100%', boxSizing: 'border-box' }}
             >
               <h2 className="section-title" style={{ textAlign: 'left' }}>{aboutData.title}</h2>
-              <p style={{ marginBottom: '2rem', fontSize: '1.1rem', color: '#555', lineHeight: '1.8' }}>
+              <p style={{ marginBottom: '1.25rem', fontSize: '0.92rem', color: '#666', lineHeight: '1.7' }}>
                 {aboutData.description}
               </p>
 
-              <div style={{ background: 'white', padding: '2rem', borderRadius: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.05)' }}>
-                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>{aboutData.boxTitle || "Get in Touch"}</h3>
+              <div style={{ background: 'white', padding: '1.15rem', borderRadius: '0px', boxShadow: '0 4px 18px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0', width: '100%', boxSizing: 'border-box' }}>
+                <h3 style={{ marginBottom: '0.85rem', fontSize: '1.15rem', fontFamily: "'Playfair Display', serif" }}>{aboutData.boxTitle || "Get in Touch"}</h3>
                 
                 {aboutData.phone && (
                   <div className="contact-item">
-                    <Phone className="contact-icon" />
+                    <Phone className="contact-icon" size={16} />
                     <a 
                       href={`https://wa.me/${(aboutData.whatsapp || aboutData.phone || '').replace(/[^0-9]/g, '')}`} 
                       target="_blank" 
                       rel="noreferrer" 
-                      style={{ fontWeight: '600' }}
+                      style={{ fontWeight: '600', fontSize: '0.92rem' }}
                     >
                       {aboutData.phone} (WhatsApp)
                     </a>
@@ -415,17 +393,17 @@ export default function LandingPage() {
                 
                 {aboutData.address && (
                   <div className="contact-item">
-                    <MapPin className="contact-icon" style={{ color: '#E1306C' }} />
-                    <span>{aboutData.address}</span>
+                    <MapPin className="contact-icon" size={16} style={{ color: '#E1306C' }} />
+                    <span style={{ fontSize: '0.88rem' }}>{aboutData.address}</span>
                   </div>
                 )}
 
-                <div style={{ marginTop: '1.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                  <Link href="/contact" className="cta-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', fontSize: '0.95rem' }}>
-                    Custom Inquiry / Book Event <ArrowRight size={16} />
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+                  <Link href="/contact" className="cta-button">
+                    Book an Event <ArrowRight size={13} />
                   </Link>
-                  <Link href="/about" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', fontSize: '0.95rem', color: '#1a1a1a', fontWeight: '600' }}>
-                    Our Story <ArrowRight size={16} />
+                  <Link href="/about" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.45rem 1rem', fontSize: '0.82rem', color: '#1a1a1a', fontWeight: '600' }}>
+                    Our Story <ArrowRight size={13} />
                   </Link>
                 </div>
               </div>

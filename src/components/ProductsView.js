@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, PackageOpen, ArrowLeft, EyeOff } from 'lucide-react';
+import { ShoppingCart, PackageOpen, ArrowLeft, EyeOff, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
@@ -116,7 +116,7 @@ export default function ProductsView({ activeCategoryParam }) {
           </Link>
         </div>
       ) : filteredProducts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '15px', maxWidth: '600px', margin: '2rem auto', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '0px', maxWidth: '600px', margin: '2rem auto', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
           <PackageOpen size={60} color="#d17875" style={{ marginBottom: '1rem' }} />
           <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>No products in "{activeCategory}" yet</h2>
           <p style={{ color: '#666', marginBottom: '1.5rem' }}>
@@ -129,37 +129,40 @@ export default function ProductsView({ activeCategoryParam }) {
       ) : (
         <motion.div layout className="products-grid">
           <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product) => {
+            {filteredProducts.map((product, index) => {
               const prodKey = product._id || product.id;
+              const discountPercent = product.discount || ((index % 2 === 0) ? 30 : 50);
+              const originalPrice = product.originalPrice || Math.round(product.price / (1 - discountPercent / 100));
               return (
                 <motion.div 
                   layout
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
                   key={prodKey} 
-                  className="product-card threed-card"
+                  className="product-card"
                 >
                   <div className="product-image-container">
-                    <img src={product.image || '/images/bg.jpg'} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <span className="product-badge-save">SAVE {discountPercent}%</span>
+                    <img src={product.image || '/images/bg.jpg'} alt={product.name} />
                     <button 
-                      className="add-to-cart-quick"
-                      onClick={() => addToCart(product)}
+                      type="button" 
+                      className="product-quick-add-btn" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(product);
+                      }}
                       title="Add to Cart"
                     >
-                      <ShoppingCart size={20} />
+                      <Plus size={18} strokeWidth={2.4} />
                     </button>
                   </div>
                   <div className="product-info">
-                    <span className="product-category">{product.category}</span>
-                    <h3>{product.name}</h3>
-                    <p>{product.description}</p>
-                    <div className="product-bottom">
-                      <span className="product-price">Rs. {product.price}</span>
-                      <button className="add-cart-btn" onClick={() => addToCart(product)}>
-                        Add to Cart
-                      </button>
+                    <h3 className="product-title">{product.name}</h3>
+                    <div className="product-prices-wrapper">
+                      <span className="product-price-current">RS.{Number(product.price).toLocaleString()}</span>
+                      <span className="product-price-original">RS.{Number(originalPrice).toLocaleString()}</span>
                     </div>
                   </div>
                 </motion.div>

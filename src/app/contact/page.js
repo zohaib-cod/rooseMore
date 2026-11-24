@@ -56,76 +56,76 @@ export default function ContactPage() {
   const storeAddress = aboutData?.address || 'Chungi Amar Sidhu, Lahore';
 
   return (
-    <main style={{ paddingTop: '100px', paddingBottom: '5rem', minHeight: '80vh', background: '#faf9f8' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
+    <main style={{ paddingTop: 'clamp(70px, 8vw, 90px)', paddingBottom: '3.5rem', minHeight: '80vh', background: '#faf9f8' }}>
+      <div style={{ maxWidth: '1050px', margin: '0 auto', padding: '0 1.25rem' }}>
         
         {/* Header Section */}
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          style={{ textAlign: 'center', marginBottom: '3.5rem' }}
+          transition={{ duration: 0.6 }}
+          style={{ textAlign: 'center', marginBottom: '2.5rem' }}
         >
           <span style={{ 
-            fontSize: '0.85rem', 
-            fontWeight: 'bold', 
+            fontSize: '0.8rem', 
+            fontWeight: '600', 
             textTransform: 'uppercase', 
-            letterSpacing: '2px', 
+            letterSpacing: '1.5px', 
             color: '#d17875', 
             display: 'inline-block',
-            marginBottom: '0.5rem'
+            marginBottom: '0.35rem'
           }}>
             Get In Touch
           </span>
-          <h1 className="hero-title" style={{ color: '#1a1a1a', textShadow: 'none', fontSize: '3rem', marginBottom: '1rem' }}>
+          <h1 className="hero-title" style={{ color: '#1a1a1a', textShadow: 'none', marginBottom: '0.65rem' }}>
             Contact Roose More
           </h1>
-          <p style={{ color: '#666', fontSize: '1.15rem', maxWidth: '650px', margin: '0 auto', lineHeight: '1.7' }}>
-            Have questions about bouquet orders, wedding stage decor, or need a custom quote? We're just a message or call away.
+          <p style={{ color: '#666', fontSize: 'clamp(0.92rem, 1.4vw, 1.05rem)', maxWidth: '580px', margin: '0 auto', lineHeight: '1.6' }}>
+            Have questions about bouquet orders, wedding decor, or need a custom quote? We're just a message or call away.
           </p>
         </motion.div>
 
         {/* Split Content: Info & Form */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '3rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+          gap: '2rem',
           alignItems: 'start'
         }}>
           {/* Left Column: Contact Cards */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: -25 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
-            style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+            transition={{ duration: 0.5 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
           >
             {/* Direct Contact Card */}
             <div style={{
               background: 'white',
-              borderRadius: '20px',
-              padding: '2.5rem',
-              boxShadow: '0 8px 30px rgba(0,0,0,0.05)',
+              borderRadius: '16px',
+              padding: '1.75rem 1.5rem',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
               border: '1px solid #f0f0f0'
             }}>
               <h2 style={{
-                fontSize: '1.75rem',
+                fontSize: '1.3rem',
                 fontFamily: "'Playfair Display', serif",
-                marginBottom: '1rem',
+                marginBottom: '0.65rem',
                 color: '#1a1a1a'
               }}>
                 {aboutData?.boxTitle || "Let's Talk"}
               </h2>
-              <p style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.7', marginBottom: '2rem' }}>
+              <p style={{ color: '#666', fontSize: '0.9rem', lineHeight: '1.65', marginBottom: '1.5rem' }}>
                 {aboutData?.description || "At Roose More Floral & Events, we believe every occasion deserves to be beautiful. Let's make your celebration unforgettable."}
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
                 {/* Phone & WhatsApp */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                   <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
                     background: '#e8f5e9',
                     display: 'flex',
                     alignItems: 'center',
@@ -133,15 +133,15 @@ export default function ContactPage() {
                     color: '#2e7d32',
                     flexShrink: 0
                   }}>
-                    <Phone size={22} />
+                    <Phone size={18} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>Phone & WhatsApp</span>
+                    <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>Phone & WhatsApp</span>
                     <a
                       href={`https://wa.me/${whatsappNum}`}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ display: 'block', fontSize: '1.1rem', fontWeight: 'bold', color: '#1a1a1a', textDecoration: 'none' }}
+                      style={{ display: 'block', fontSize: '0.95rem', fontWeight: 'bold', color: '#1a1a1a', textDecoration: 'none' }}
                     >
                       {phoneNum}
                     </a>
@@ -149,11 +149,11 @@ export default function ContactPage() {
                 </div>
 
                 {/* Location */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                   <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
                     background: '#fce4ec',
                     display: 'flex',
                     alignItems: 'center',
@@ -161,22 +161,22 @@ export default function ContactPage() {
                     color: '#E1306C',
                     flexShrink: 0
                   }}>
-                    <MapPin size={22} />
+                    <MapPin size={18} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>Studio Location</span>
-                    <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 'bold', color: '#1a1a1a' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>Studio Location</span>
+                    <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 'bold', color: '#1a1a1a' }}>
                       {storeAddress}
                     </p>
                   </div>
                 </div>
 
                 {/* Timings */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                   <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
                     background: '#fff3e0',
                     display: 'flex',
                     alignItems: 'center',
@@ -184,11 +184,11 @@ export default function ContactPage() {
                     color: '#f57c00',
                     flexShrink: 0
                   }}>
-                    <Clock size={22} />
+                    <Clock size={18} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>Store Timings</span>
-                    <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 'bold', color: '#1a1a1a' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>Store Timings</span>
+                    <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 'bold', color: '#1a1a1a' }}>
                       Mon - Sun: 9:00 AM - 11:00 PM
                     </p>
                   </div>
@@ -196,7 +196,7 @@ export default function ContactPage() {
               </div>
 
               {/* Quick WhatsApp Action Button */}
-              <div style={{ marginTop: '2.5rem' }}>
+              <div style={{ marginTop: '1.75rem' }}>
                 <a
                   href={`https://wa.me/${whatsappNum}?text=Hi%20Roose%20More,%20I%20have%20an%20inquiry.`}
                   target="_blank"
@@ -205,18 +205,18 @@ export default function ContactPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.6rem',
+                    gap: '0.5rem',
                     background: '#25D366',
                     color: 'white',
-                    padding: '0.9rem',
-                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    borderRadius: '10px',
                     textDecoration: 'none',
-                    fontWeight: 'bold',
-                    fontSize: '1rem',
-                    boxShadow: '0 6px 20px rgba(37, 211, 102, 0.3)'
+                    fontWeight: '600',
+                    fontSize: '0.92rem',
+                    boxShadow: '0 4px 15px rgba(37, 211, 102, 0.25)'
                   }}
                 >
-                  <Phone size={18} /> Chat Directly on WhatsApp
+                  <Phone size={16} /> Chat Directly on WhatsApp
                 </a>
               </div>
             </div>
@@ -224,27 +224,27 @@ export default function ContactPage() {
 
           {/* Right Column: Inquiry Form */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: 25 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.5 }}
           >
             <div style={{
               background: 'white',
-              borderRadius: '20px',
-              padding: '2.5rem',
-              boxShadow: '0 8px 30px rgba(0,0,0,0.05)',
+              borderRadius: '16px',
+              padding: '1.75rem 1.5rem',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
               border: '1px solid #f0f0f0'
             }}>
               <h2 style={{
-                fontSize: '1.75rem',
+                fontSize: '1.3rem',
                 fontFamily: "'Playfair Display', serif",
-                marginBottom: '0.5rem',
+                marginBottom: '0.35rem',
                 color: '#1a1a1a'
               }}>
                 Send an Event Inquiry
               </h2>
-              <p style={{ color: '#666', fontSize: '0.95rem', marginBottom: '1.75rem' }}>
-                Fill out the form below and we will get back to you with custom pricing and setup options.
+              <p style={{ color: '#666', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
+                Fill out the form below and we will get back to you with custom pricing.
               </p>
 
               {submitted && (
@@ -252,22 +252,23 @@ export default function ContactPage() {
                   background: '#e8f5e9',
                   border: '1px solid #c8e6c9',
                   color: '#2e7d32',
-                  padding: '1rem',
-                  borderRadius: '10px',
-                  marginBottom: '1.5rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.25rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  fontSize: '0.88rem'
                 }}>
-                  <CheckCircle2 size={20} />
+                  <CheckCircle2 size={18} />
                   <span>WhatsApp inquiry prepared! Opening chat now...</span>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {/* Name */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.25rem' }}>
                     Your Name *
                   </label>
                   <input
@@ -275,13 +276,13 @@ export default function ContactPage() {
                     placeholder="e.g. Ali Khan"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    style={{ width: '100%', padding: '0.85rem', borderRadius: '10px', border: '1px solid #ddd' }}
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                   />
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.25rem' }}>
                     WhatsApp / Phone Number *
                   </label>
                   <input
@@ -289,20 +290,20 @@ export default function ContactPage() {
                     placeholder="e.g. 0300 1234567"
                     value={formData.phone}
                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                    style={{ width: '100%', padding: '0.85rem', borderRadius: '10px', border: '1px solid #ddd' }}
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                   />
                 </div>
 
                 {/* Service Type & Date */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.25rem' }}>
                       Service Needed
                     </label>
                     <select
                       value={formData.serviceType}
                       onChange={e => setFormData({ ...formData, serviceType: e.target.value })}
-                      style={{ width: '100%', padding: '0.85rem', borderRadius: '10px', border: '1px solid #ddd', background: 'white' }}
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #ddd', background: 'white', fontSize: '0.9rem' }}
                     >
                       <option value="Bouquets">Hand Bouquet</option>
                       <option value="Room Decor">Room Decor</option>
@@ -315,21 +316,21 @@ export default function ContactPage() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.25rem' }}>
                       Event Date (Optional)
                     </label>
                     <input
                       type="date"
                       value={formData.date}
                       onChange={e => setFormData({ ...formData, date: e.target.value })}
-                      style={{ width: '100%', padding: '0.85rem', borderRadius: '10px', border: '1px solid #ddd', background: 'white' }}
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #ddd', background: 'white', fontSize: '0.9rem' }}
                     />
                   </div>
                 </div>
 
                 {/* Message */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.25rem' }}>
                     Event Details / Special Request
                   </label>
                   <textarea
@@ -337,31 +338,25 @@ export default function ContactPage() {
                     placeholder="Describe your theme, preferred flowers, venue location or budget..."
                     value={formData.message}
                     onChange={e => setFormData({ ...formData, message: e.target.value })}
-                    style={{ width: '100%', padding: '0.85rem', borderRadius: '10px', border: '1px solid #ddd', resize: 'vertical' }}
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem', resize: 'vertical' }}
                   />
                 </div>
 
                 {/* Submit */}
                 <button
                   type="submit"
+                  className="cta-button"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.6rem',
-                    background: '#d17875',
-                    color: 'white',
-                    padding: '1rem',
-                    borderRadius: '10px',
+                    width: '100%',
+                    padding: '0.55rem 1rem',
+                    borderRadius: '20px',
                     border: 'none',
-                    fontWeight: 'bold',
-                    fontSize: '1rem',
                     cursor: 'pointer',
-                    marginTop: '0.5rem',
-                    boxShadow: '0 4px 15px rgba(209, 120, 117, 0.4)'
+                    marginTop: '0.4rem',
+                    letterSpacing: '0.8px'
                   }}
                 >
-                  <Send size={18} /> Send Inquiry via WhatsApp
+                  <Send size={14} /> Send Inquiry via WhatsApp
                 </button>
               </form>
             </div>

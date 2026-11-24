@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ShoppingBag, Package, DollarSign } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ totalOrders: 0, totalProducts: 0, totalRevenue: 0 });
@@ -11,8 +12,8 @@ export default function AdminDashboard() {
     async function fetchStats() {
       try {
         const [ordersRes, productsRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`)
+          fetch(`${API_BASE_URL}/orders`),
+          fetch(`${API_BASE_URL}/products`)
         ]);
         
         const ordersData = await ordersRes.json();

@@ -8,9 +8,9 @@ export const metadata = {
   title: 'Roose More Floral & Events | Premium Decor in Lahore',
   description: 'Premium original and artificial flower decoration, birthday events, room decor, car decor, baby shower and more. Located at Chungi Amar Sidhu, Lahore.',
   icons: {
-    icon: '/images/logo.jpg',
-    shortcut: '/images/logo.jpg',
-    apple: '/images/logo.jpg',
+    icon: '/images/logo.png',
+    shortcut: '/images/logo.png',
+    apple: '/images/logo.png',
   },
 };
 

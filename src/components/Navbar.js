@@ -50,11 +50,12 @@ export default function Navbar() {
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-      <Link href="/" className="logo">
-        <div style={{ position: 'relative', width: '50px', height: '50px', borderRadius: '50%', overflow: 'hidden' }}>
-          <img src="/images/logo.jpg" alt="Roose More Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-        <span className="logo-text">Roose More</span>
+      <Link href="/" className="logo" title="Roose More Floral & Events">
+        <img 
+          src="/images/logo.png" 
+          alt="Roose More Floral & Events" 
+          className="brand-logo-img" 
+        />
       </Link>
 
       <div className="nav-links desktop-only">
@@ -70,8 +71,8 @@ export default function Navbar() {
               All Products
             </Link>
             {navCategories.map(cat => (
-              <Link 
-                key={cat.slug} 
+              <Link
+                key={cat.slug}
                 href={`/products/${cat.slug}`}
                 style={{ fontWeight: pathname === `/products/${cat.slug}` ? 'bold' : 'normal' }}
               >
@@ -92,15 +93,15 @@ export default function Navbar() {
       </div>
 
       <div className="nav-actions">
-        <a href="https://wa.me/923034836076" target="_blank" rel="noreferrer" className="icon-btn">
-          <Phone />
+        <a href="https://wa.me/923034836076" target="_blank" rel="noreferrer" className="icon-btn desktop-only" title="Chat on WhatsApp">
+          <Phone size={17} />
         </a>
-        <button onClick={() => setIsCartOpen(true)} className="icon-btn cart-btn">
-          <ShoppingCart />
+        <button onClick={() => setIsCartOpen(true)} className="icon-btn cart-btn" title="Shopping Cart">
+          <ShoppingCart size={18} />
           {cartItemCount > 0 && <span className="cart-badge">{cartItemCount}</span>}
         </button>
-        <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          {mobileMenuOpen ? <X /> : <Menu />}
+        <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
@@ -133,6 +134,24 @@ export default function Navbar() {
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} style={{ color: pathname === '/contact' ? '#d17875' : undefined, fontWeight: pathname === '/contact' ? '700' : 'normal' }}>
             Contact Us
           </Link>
+          <a
+            href="https://wa.me/923034836076"
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              color: '#25D366',
+              fontWeight: '600',
+              paddingTop: '0.5rem',
+              borderTop: '1px solid #f0f0f0',
+              marginTop: '0.35rem'
+            }}
+          >
+            <Phone size={15} /> WhatsApp (+92 303 4836076)
+          </a>
         </div>
       )}
     </nav>
